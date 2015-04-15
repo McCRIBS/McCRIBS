@@ -1,0 +1,1 @@
+Folder containing the application and the configuration file "cnf.mat".
