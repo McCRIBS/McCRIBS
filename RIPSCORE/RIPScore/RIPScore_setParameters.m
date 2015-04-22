@@ -148,7 +148,9 @@ function [] = RIPScore_setParameters(AppDir)
     
 	%% Other variables
     ShowMsgs=false;     %Flag to indicate whether messages should be sent to the standard output
-    [b_HP_RIP,a_HP_RIP]=cheby1(6,0.1,0.0825/(Fs/2),'high');  %High-pass filter for very low frequency trends in RIP signals
+    % RIP high-pass filter
+    [z_HP_RIP,p_HP_RIP,k_HP_RIP]=cheby1(6,0.1,0.0825/(Fs/2),'high');  %High-pass filter for very low frequency trends in RIP signals
+    [sos_HP_RIP,g_HP_RIP]=zp2sos(z_HP_RIP,p_HP_RIP,k_HP_RIP);
 
     %% Save configuration
     save([AppDir '\cnf.mat']);

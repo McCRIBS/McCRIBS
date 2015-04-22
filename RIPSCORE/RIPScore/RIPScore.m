@@ -91,7 +91,8 @@ else
     ShowMsgs=true;          %Flag to indicate whether messages should be sent to the standard output
 
     % RIP high-pass filter
-    [b_HP_RIP,a_HP_RIP]=cheby1(6,0.1,0.0825/(Fs/2),'high');  %High-pass filter for very low frequency trends in RIP signals
+    [z_HP_RIP,p_HP_RIP,k_HP_RIP]=cheby1(6,0.1,0.0825/(Fs/2),'high');  %High-pass filter for very low frequency trends in RIP signals
+    [sos_HP_RIP,g_HP_RIP]=zp2sos(z_HP_RIP,p_HP_RIP,k_HP_RIP);
 
     % Define states
     PAU=stateCode('PAU');	%Pause
@@ -290,8 +291,8 @@ elseif(guiMode==1)  %Run RIPScore in BLIND scorer mode
         return;
     end
     [~,RCG,ABD,PPG,SAT]=RIPScore_readData([datadir SCORER.current.file(1:end-4)]);
-    RCG=filtfilt(b_HP_RIP,a_HP_RIP,RCG);
-    ABD=filtfilt(b_HP_RIP,a_HP_RIP,ABD);
+    RCG=filtfilt(sos_HP_RIP,g_HP_RIP,RCG);
+    ABD=filtfilt(sos_HP_RIP,g_HP_RIP,ABD);
     Signals=[RCG ABD PPG SAT];
     L=size(Signals,1);
 
