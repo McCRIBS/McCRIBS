@@ -67,12 +67,14 @@ function [] = RIPScore_setParameters(AppDir)
 
     %% Path to directory where scoring results are saved
     uiwait(msgbox('Select directory where scoring results are saved','Scoring results path','warn'));
+    pause(0.25);
     scordir=uigetdir(AppDir,'Scoring results path');
     scordir=[scordir '\'];
     uiwait(msgbox(['Scoring results will be saved to: ' char(10) scordir],'Scoring results path','warn'));
     
     %% Path to directory where data records are stored
     uiwait(msgbox('Select directory where data records are stored','Data records path','warn'));
+    pause(0.25);
     datadir=uigetdir([scordir '..\'],'Data records path');
     datadir=[datadir '\'];
     uiwait(msgbox(['Data records will be loaded from: ' char(10) datadir],'Data records path','warn'));
@@ -120,6 +122,7 @@ function [] = RIPScore_setParameters(AppDir)
 
     %% Full path to the library of "true-state" segments
     uiwait(msgbox('Select the "true-state" segment library file.','"True-state" Library','warn'));
+    pause(0.25);
     [tslFilename,tslPathname]=uigetfile({'*.mat','MATLAB file'},'"True-state" Library');
     TrueState_Library_path=[tslPathname tslFilename];
     uiwait(msgbox(['The "true-state" segment library will be loaded from: ' char(10) TrueState_Library_path],'"True-state" Library','warn'));
