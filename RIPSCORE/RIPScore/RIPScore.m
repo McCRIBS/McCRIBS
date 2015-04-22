@@ -164,8 +164,8 @@ if(guiMode==0)  %Run RIPScore in OPEN mode
 
         %Load the signals from the selected RAW DATA file
         [~,RCG,ABD,PPG,SAT]=RIPScore_readData([pathname filename(1:end-4)]);
-        RCG=filtfilt(b_HP_RIP,a_HP_RIP,RCG);
-        ABD=filtfilt(b_HP_RIP,a_HP_RIP,ABD);
+        RCG=filtfilt(sos_HP_RIP,g_HP_RIP,RCG);
+        ABD=filtfilt(sos_HP_RIP,g_HP_RIP,ABD);
         Signals=[RCG ABD PPG SAT];
         L=size(Signals,1);
 
