@@ -1,6 +1,6 @@
 %'preprocess_data_records.m' loads raw data records
 %and pre-processes them by inserting segments with
-%known "true-states" at random times. It uses the
+%known "true-patterns" at random times. It uses the
 %following RIPScore functions:
 %   (1) RIPScore_preprocess.m
 %
@@ -60,8 +60,8 @@ Fs=50;          %The sampling frequency
 %Data records
 datadir=[McCRIB_DATA_ROOT '\POA\Original_Dataset\data\']; %Path to the raw data. Data must be in RIPScore format
 
-%"True-state" library
-TrueState_Library_path=[McCRIB_DATA_ROOT '\POA\TrueState_Segment_Library\TrueState_Library.mat'];	%The complete path to the "true-state" segments library
+%"True-pattern" library
+TrueState_Library_path=[McCRIB_DATA_ROOT '\POA\TruePattern_Segment_Library\TruePattern_Library.mat'];	%The complete path to the "true-pattern" segments library
 aux=load(TrueState_Library_path);
 TrueState_Library=aux.goldenEvents;
 clear aux
@@ -79,9 +79,9 @@ lengthEach=zeros(numFiles,1);
 wL=18;
 winType=1;
 
-%% Generate and save "true-state" segments used for evaluation
-useRealData=1;          %1:"true-state" data, 0:simulated data
-expectedLength=1111*Fs; %The expected length (in samples) of the generated "true-state" segments after being concatenated
+%% Generate and save "true-pattern" segments used for evaluation
+useRealData=1;          %1:"true-pattern" data, 0:"simulated-pattern" data
+expectedLength=1111*Fs; %The expected length (in samples) of the generated "true-pattern" segments after being concatenated
 
 TrueState_Segms=generateEvents(useRealData,expectedLength,TrueState_Library,wL,true);
 save('PreProcessing_Segments','TrueState_Segms');

@@ -91,7 +91,7 @@ function RIPScore_training_OpeningFcn(hObject, eventdata, handles, varargin)
         handles.IsTesting=0;
         handles.datadir=handles.TRAINEE.savepath;
 
-    %Get "true-state" library
+    %Get "true-pattern" library
         TrueState_Library=varargin{3};
 
 	%Get simulation parameters
@@ -152,9 +152,9 @@ function RIPScore_training_OpeningFcn(hObject, eventdata, handles, varargin)
         %Generate data
         handles.useRealData=[];
         if handles.TRAINEE.level==1
-            handles.useRealData=0;  %"Simulated-state" data
+            handles.useRealData=0;  %"Simulated-pattern" data
         else
-            handles.useRealData=1;  %"True-state" data
+            handles.useRealData=1;  %"True-pattern" data
         end
         Events=generateEvents(handles.useRealData,handles.trainLength,TrueState_Library,handles.wL,true);
         [Data,State,EventID]=artificialData(Events,handles.wL,handles.winType);
@@ -186,7 +186,7 @@ function RIPScore_training_OpeningFcn(hObject, eventdata, handles, varargin)
         handles.maxStartTime=length(handles.RCG)./handles.Fs-handles.EpochSize;
 
     %Initialize practice exit condition
-        handles.evaluateExitPractice=ones(size(handles.states));    %This is the sample from which the exit condition has to be evaluated for each state type
+        handles.evaluateExitPractice=ones(size(handles.states));    %This is the sample from which the exit condition has to be evaluated for each pattern type
 
     %Get first segment to display
         newStart=getNextRemainingSample(handles.SCORING.Events,handles.signalLength)/handles.Fs-handles.lastEventPreview;
@@ -496,7 +496,7 @@ function storedata(hObject,handles,code)
 
             if handles.IsTesting==0 %If TRAINEE is in practice stage
                 %Evaluate if last scored segment is correct
-                segmEvt=handles.State(handles.SCORING.Events(handles.SCORING.NextScore-1,1):handles.SCORING.Events(handles.SCORING.NextScore-1,2)); %Get the Actual State for the selected segment
+                segmEvt=handles.State(handles.SCORING.Events(handles.SCORING.NextScore-1,1):handles.SCORING.Events(handles.SCORING.NextScore-1,2)); %Get the Actual Pattern for the selected segment
                 segmEvt=segmEvt(segmEvt>0); %Discard transition samples
                 pctIdentified=mean(segmEvt==code);
                 isIncorrect=pctIdentified<handles.pctEvt;
@@ -505,11 +505,11 @@ function storedata(hObject,handles,code)
                     %If TRAINEE only identified less than handles.pctEvt, then they have to review and correct accordingly
                     plot_data(handles,'storedata - incorrect score')
                     ShowCursorData(handles)
-                    msg=['The last segment was scored incorrectly.' char(10) char(10) 'Please review the Actual State and the highlighted signals.' char(10) char(10) 'Click "OK" to correct your score.' char(10)];
-                    uiwait(errordlg([msg ''],'Incorrect State','modal'));
+                    msg=['The last segment was scored incorrectly.' char(10) char(10) 'Please review the Actual Pattern and the highlighted signals.' char(10) char(10) 'Click "OK" to correct your score.' char(10)];
+                    uiwait(errordlg([msg ''],'Incorrect Pattern','modal'));
                     
                     %Reset condition to exit practice in the incorrect events
-                    %   in the state type of the one that was not identified,
+                    %   in the pattern type of the one that was not identified,
                     whichStates=unique(segmEvt);
                     auxmsg=[''];
                     for index=1:length(whichStates)
@@ -627,7 +627,7 @@ function handles=StartTest(hObject,handles)
         end
         if sum(exitCondition)==length(exitCondition)
             startFlag=1;
-            verbose([num2str(handles.ConsecutiveEvts) ' consecutive of each state type condition to start test...'],handles.ShowMsgs);
+            verbose([num2str(handles.ConsecutiveEvts) ' consecutive of each pattern type condition to start test...'],handles.ShowMsgs);
         end
     end
     
@@ -643,7 +643,7 @@ function handles=StartTest(hObject,handles)
         handles.TRAINEE.PracticeTime{handles.TRAINEE.level}(handles.TRAINEE.iteration(handles.TRAINEE.level))=handles.SCORING.ElapsedTime+toc(handles.ticID);
         
         %Output message to trainee
-        msg=['Practice has been completed.' char(10) char(10) 'The test stage will start shortly...' char(10) 'During the test the Actual States will not be shown for comparison.' char(10) 'The test consists of ' num2str(handles.testLength./(60*60*handles.Fs),'%1.1f') ' hrs of recording.' char(10)];
+        msg=['Practice has been completed.' char(10) char(10) 'The test stage will start shortly...' char(10) 'During the test the Actual Patterns will not be shown for comparison.' char(10) 'The test consists of ' num2str(handles.testLength./(60*60*handles.Fs),'%1.1f') ' hrs of recording.' char(10)];
         uiwait(warndlg([msg ''],'Results','modal'));
         
         %Concatenate the signals of practice and testing stages
@@ -768,7 +768,7 @@ function RIPScore_training_axes_AssignedState_ButtonDownFcn(hObject, eventdata, 
 % hObject    handle to RIPScore_training_axes_AssignedState (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    clickCoords=get(hObject,'CurrentPoint');    %The coordinates of the click over the states' bar
+    clickCoords=get(hObject,'CurrentPoint');    %The coordinates of the click over the RIP pattern bar
     clickSample=round(clickCoords(1,1).*handles.Fs);
 
     %Find the segment that corresponds to the selected coordinates
@@ -1057,7 +1057,7 @@ function RIPScore_training_edit_EpochTime_Callback(hObject, eventdata, handles)
     end
 end
 
-%Plots the signals and the state bars
+%Plots the signals and the pattern bars
 function plot_data(handles,msg)
 %     if(~isempty(msg))
 %         display(['Plot message:' msg])
@@ -1249,7 +1249,7 @@ function Conclude_Session(hObject,handles)
 %Performance Evaluation
     %Accuracy
     scorsig=events2signal(handles.SCORING.Events);
-    ixEval=and(handles.IsTestSegment==1,handles.State>0);   %We evaluate the agreement in all samples in the test stage with valid states (i.e., State>0)
+    ixEval=and(handles.IsTestSegment==1,handles.State>0);   %We evaluate the agreement in all samples in the test stage with valid patterns (i.e., pattern>0)
     gold=handles.State(ixEval);
     scor=scorsig(ixEval);
     for index=1:length(handles.states)
@@ -1389,9 +1389,9 @@ function Conclude_Session(hObject,handles)
     TRAINEE=handles.TRAINEE;
     save([handles.TRAINEE.savepath handles.TRAINEE.savename],'TRAINEE');
     
-%Review mode. Indicate that Actual States will be shown for comparison
+%Review mode. Indicate that Actual Patterns will be shown for comparison
 %When finished reviewing the scores, click RIPScore_training_button_SaveDone to terminate the session.
-    msg=['Actual States will be shown for you to review.' char(10) 'Click "Done" to terminate the session.'];
+    msg=['Actual Patterns will be shown for you to review.' char(10) 'Click "Done" to terminate the session.'];
     uiwait(warndlg([msg ''],'Review','modal'))
     
     %Enable the "RIPScore_training_button_SaveDone" button

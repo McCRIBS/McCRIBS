@@ -1,6 +1,6 @@
 function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segms,wL,winType,Fs,ShowMsgs)
 %RIPSCORE_PREPROCESS Pre-processes raw cardiorespiratory
-%	signals by inserting segments with known "true-states".
+%	signals by inserting segments with known "true-patterns".
 %	[DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segms,wL,winType,Fs,ShowMsgs)
 %       returns the pre-processed DataPrep by inserting
 %       TrueState_Segms into Data.
@@ -9,12 +9,12 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
 %   Data is an N-by-5 matrix with the original
 %       cardiorespiratory signals to be pre-processed.
 %	TrueState_Segms is a struct array with a list of
-%       data segments with an identified "true-state".
+%       data segments with an identified "true-pattern".
 %       These segments will be inserted into Data to
 %       yield DataPrep. TrueState_Segms has the
 %       following fields:
 %    	* Data is a 1-by-L cell array with one "true-
-%         state" segment per item. Each cell has an Si-
+%         pattern" segment per item. Each cell has an Si-
 %         by-4 matrix, where Si is the length of the
 %         segment and the columns correspond to:
 %           (1)Ribcage (arbitrary units),
@@ -22,8 +22,8 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
 %           (3)Photoplethysmograph (arbitrary units),
 %           (4)Blood oxygen saturation (%).
 %         The sampling frequency is Fs.
-%    	* type is a L-by-1 vector with the state type
-%         of each of the segments. The state type codes
+%    	* type is a L-by-1 vector with the pattern type
+%         of each of the segments. The pattern type codes
 %         are:
 %           (1) Pause=1,
 %           (2) Asynchronous-breathing=2,
@@ -54,13 +54,13 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
 %       cardiorespiratory signals.
 %   ReconstructionData is a struct with the pre-
 %       processing information, including the location
-%       of each inserted "true-state" segment, its
-%       state code and state ID. The struct has the
+%       of each inserted "true-pattern" segment, its
+%       pattern code and pattern ID. The struct has the
 %       following fields:
 %    	* State_Tot is an M-by-1 vector of integers
-%         with the state code for each sample in
-%         DataPrep. Inserted "true-state" segments
-%         have one of six state codes:
+%         with the pattern code for each sample in
+%         DataPrep. Inserted "true-pattern" segments
+%         have one of six pattern codes:
 %           (1) Pause=1,
 %           (2) Asynchronous-breathing=2,
 %           (3) Movement artifact=3,
@@ -69,7 +69,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
 %           (6) Unknown=99.
 %    	* EventID_Tot is an M-by-1 vector indicating
 %         which samples from DataPrep correspond to each
-%         inserted "true-state" segment. Each segment
+%         inserted "true-pattern" segment. Each segment
 %         has a different ID and was inserted twice in
 %         the original Data.
 %
@@ -162,7 +162,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
     
     %Insert the evaluation segments (Half 1)
     ixThisHalf=[(2*wL+2):1:halfMarker-(2*wL+2)]';       %Sample indices corresponding to this half
-    ixToInsert=sort(randsample(ixThisHalf,numSegm));    %Randomly select indices where "true-state" segments will be inserted
+    ixToInsert=sort(randsample(ixThisHalf,numSegm));    %Randomly select indices where "true-pattern" segments will be inserted
     testShort=[2*wL+2;diff(ixToInsert)];                %Verify that the number of samples between insertion indices is > concatenation window (2*wL+1)
     ixTooShort=find(testShort<(2*wL+1));
     while ~isempty(ixTooShort)                          %Replace all indices where the number of samples between consecutive indices is <= (2*wL+1)
@@ -173,7 +173,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
         ixTooShort=find(testShort<(2*wL+1));
     end
     ixStartSeg=[1;ixToInsert(1:end-1)+1];               %The start of each original Data segment
-    auxSegms.Data={};                                   %Auxiliary Segments struct to arrange original and "true-state" segments
+    auxSegms.Data={};                                   %Auxiliary Segments struct to arrange original and "true-pattern" segments
     auxSegms.type=zeros(2*numSegm+1,1);
     auxSegms.length=zeros(2*numSegm+1,1);
     auxSegms.eventID=zeros(2*numSegm+1,1);
@@ -183,13 +183,13 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
         ixSegm=[ixStartSeg(jndex):1:ixToInsert(jndex)]';%Indices of the original Data segment
         auxData=[RCGorig(ixSegm) ABDorig(ixSegm) PPGorig(ixSegm) SATorig(ixSegm)];  %Get the original Data
         auxSegms.Data{counter}=auxData;                 %Save the original Data segment in the Segments struct
-        auxSegms.type(counter)=-1;                      %Original data has no defined state (type=-1)
+        auxSegms.type(counter)=-1;                      %Original data has no defined pattern (type=-1)
         auxSegms.length(counter)=length(ixSegm);
         auxSegms.eventID(counter)=-1;                   %Original data has no defined ID (eventID=-1)
         clear auxData ixSegm
         
         counter=counter+1;
-        auxSegms.Data{counter}=Segms_Half1.Data{jndex}; %Get the next "true-state" segment and save it to the Segments struct
+        auxSegms.Data{counter}=Segms_Half1.Data{jndex}; %Get the next "true-pattern" segment and save it to the Segments struct
         auxSegms.type(counter)=Segms_Half1.type(jndex);
         auxSegms.length(counter)=Segms_Half1.length(jndex);
         auxSegms.eventID(counter)=Segms_Half1.eventID(jndex);
@@ -206,7 +206,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
     
     %Insert the evaluation segments (Half 2)
     ixThisHalf=[halfMarker+(2*wL+2):1:numSampl-(2*wL+2)]';	%Sample indices corresponding to this half
-    ixToInsert=sort(randsample(ixThisHalf,numSegm));        %Randomly select indices where "true-state" segments will be inserted
+    ixToInsert=sort(randsample(ixThisHalf,numSegm));        %Randomly select indices where "true-pattern" segments will be inserted
     testShort=[2*wL+2;diff(ixToInsert)];
     ixTooShort=find(testShort<(2*wL+1));
     while ~isempty(ixTooShort)
@@ -217,7 +217,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
         ixTooShort=find(testShort<(2*wL+1));
     end
     ixStartSeg=[halfMarker+1;ixToInsert(1:end-1)+1];        %The start of each original Data segment
-    auxSegms.Data={};                                       %Auxiliary Segments struct to arrange original and "true-state" segments
+    auxSegms.Data={};                                       %Auxiliary Segments struct to arrange original and "true-pattern" segments
     auxSegms.type=zeros(2*numSegm+1,1);
     auxSegms.length=zeros(2*numSegm+1,1);
     auxSegms.eventID=zeros(2*numSegm+1,1);
@@ -233,7 +233,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
         clear auxData ixSegm
         
         counter=counter+1;
-        auxSegms.Data{counter}=Segms_Half2.Data{jndex};     %Get the next "true-state" segment and save it to the Segments struct
+        auxSegms.Data{counter}=Segms_Half2.Data{jndex};     %Get the next "true-pattern" segment and save it to the Segments struct
         auxSegms.type(counter)=Segms_Half2.type(jndex);
         auxSegms.length(counter)=Segms_Half2.length(jndex);
         auxSegms.eventID(counter)=Segms_Half2.eventID(jndex);
@@ -252,7 +252,7 @@ function [DataPrep,ReconstructionData] = RIPScore_preprocess(Data,TrueState_Segm
     Data_Tot=[Data_Half1;Data_Half2];           %Final signals obtained by putting together the two halves
     ReconstructionData.State_Tot=[State_Half1;State_Half2];
     ReconstructionData.EventID_Tot=[EventID_Half1;EventID_Half2];
-    ReconstructionData.EventIDNoSimulation=-1;	%Segments from Data that don't correspond to "true-state" segments
+    ReconstructionData.EventIDNoSimulation=-1;	%Segments from Data that don't correspond to "true-pattern" segments
     ReconstructionData.EventIDTransitions=0;    %Segments that correspond to concatenation transitions
     clear Data_Half1 Data_Half2 State_Half1 State_Half2 EventID_Half1 EventID_Half2
 

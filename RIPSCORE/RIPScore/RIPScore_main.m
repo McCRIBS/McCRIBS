@@ -474,7 +474,7 @@ function RIPScore_main_axes_AssignedState_ButtonDownFcn(hObject, eventdata, hand
 % hObject    handle to RIPScore_main_axes_AssignedState (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-    clickCoords=get(hObject,'CurrentPoint');    %The coordinates of the click over the states' bar
+    clickCoords=get(hObject,'CurrentPoint');    %The coordinates of the click over the RIP pattern bar
     clickSample=round(clickCoords(1,1).*handles.Fs);
 
     verbose(['Click on RIPScore_main_axes_AssignedState!'],handles.ShowMsgs);
@@ -752,7 +752,7 @@ if (handles.flag==0)
     guidata(hObject,handles);
 end
 
-%Plots the signals and the state bar
+%Plots the signals and the RIP pattern bar
 function plot_data(handles,msg)
 %     if(~isempty(msg))
 %         display(['Plot message:' msg])

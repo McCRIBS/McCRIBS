@@ -96,7 +96,7 @@ function [] = RIPScore_setParameters(AppDir)
         'ALPHA for (1-ALPHA) confidence intervals:',...
         'wL (half the length in samples of the segment concatenation window, see combineSignals):',...
         'winType (type of concatenation window, see combineSignals):',...
-        'Consecutive segments (of each state type) to finish practice stage (#):',...
+        'Consecutive segments (of each pattern type) to finish practice stage (#):',...
         'Segment proportion that has to be correctly identified to be considered detected (in practice stage):',...
         'Maximum length (in s) of practice stage before starting the testing stage:',...
         'Length (in s) of the testing stage:',...
@@ -120,15 +120,15 @@ function [] = RIPScore_setParameters(AppDir)
     ThresholdEffectiveTrainTime=str2double(trainVars{11});	%If the effective training time was below 4 hrs
     clear dlg_title prompt defAns num_lines trainVars
 
-    %% Full path to the library of "true-state" segments
-    uiwait(msgbox('Select the "true-state" segment library file.','"True-state" Library','warn'));
+    %% Full path to the library of "true-pattern" segments
+    uiwait(msgbox('Select the "true-pattern" segment library file.','"True-pattern" Library','warn'));
     pause(0.25);
-    [tslFilename,tslPathname]=uigetfile({'*.mat','MATLAB file'},'"True-state" Library');
+    [tslFilename,tslPathname]=uigetfile({'*.mat','MATLAB file'},'"True-pattern" Library');
     TrueState_Library_path=[tslPathname tslFilename];
-    uiwait(msgbox(['The "true-state" segment library will be loaded from: ' char(10) TrueState_Library_path],'"True-state" Library','warn'));
+    uiwait(msgbox(['The "true-pattern" segment library will be loaded from: ' char(10) TrueState_Library_path],'"True-pattern" Library','warn'));
     clear tslFilename tslPathname
     
-    %% Define states
+    %% Define patterns
     PAU=stateCode('PAU');	%Pause
     ASB=stateCode('ASB');	%Asynchronous-Breathing
     MVT=stateCode('MVT');	%Movement Artifact
@@ -138,12 +138,12 @@ function [] = RIPScore_setParameters(AppDir)
     states=[PAU ASB MVT SYB SIH UNK]';
     numStates=length(states);
 
-    statesAbbr=cell(6,1);   %State abbreviations
+    statesAbbr=cell(6,1);   %Pattern abbreviations
     for index=1:numStates
         statesAbbr{index}=stateAbbreviation(states(index));
     end
 
-    statesName=cell(6,1);   %State names
+    statesName=cell(6,1);   %Pattern names
     for index=1:numStates
         statesName{index}=stateName(states(index));
     end

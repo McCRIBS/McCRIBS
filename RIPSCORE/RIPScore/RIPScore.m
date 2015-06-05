@@ -94,7 +94,7 @@ else
     [z_HP_RIP,p_HP_RIP,k_HP_RIP]=cheby1(6,0.1,0.0825/(Fs/2),'high');  %High-pass filter for very low frequency trends in RIP signals
     [sos_HP_RIP,g_HP_RIP]=zp2sos(z_HP_RIP,p_HP_RIP,k_HP_RIP);
 
-    % Define states
+    % Define patterns
     PAU=stateCode('PAU');	%Pause
     ASB=stateCode('ASB');	%Asynchronous-Breathing
     MVT=stateCode('MVT');	%Movement Artifact
@@ -104,12 +104,12 @@ else
     states=[PAU ASB MVT SYB SIH UNK]';
     numStates=length(states);
 
-    statesAbbr=cell(6,1);   %State abbreviations
+    statesAbbr=cell(6,1);   %Pattern abbreviations
     for index=1:numStates
         statesAbbr{index}=stateAbbreviation(states(index));
     end
 
-    statesName=cell(6,1);   %State names
+    statesName=cell(6,1);   %Pattern names
     for index=1:numStates
         statesName{index}=stateName(states(index));
     end
@@ -127,9 +127,9 @@ else
     ThresholdLowestKappa=0.8;               %If the lowest kappa lower limit is >= 0.8
     ThresholdEffectiveTrainTime=4*60*60;	%If the effective training time was below 4 hrs
 
-    % Full path to the library of "true-state" segments
+    % Full path to the library of "true-pattern" segments
     McCRIB_DATA_ROOT=getenv('McCRIB_DATA_ROOT');    %Get McCRIB_DATA_ROOT path
-    TrueState_Library_path=[McCRIB_DATA_ROOT '\POA\TrueState_Segment_Library\TrueState_Library'];
+    TrueState_Library_path=[McCRIB_DATA_ROOT '\POA\TruePattern_Segment_Library\TruePattern_Library'];
 end
 clear AppDir
 
@@ -474,7 +474,7 @@ elseif (guiMode==2)  %Run RIPScore in TRAINING mode
     savename=[pathname 'trained_' trainee '_level_' num2str(TRAINEE.level) '_iteration_' num2str(TRAINEE.iteration(TRAINEE.level)) '.mat'];
     verbose(['Save name: ' savename],ShowMsgs);
     
-    %Load "true-state" library
+    %Load "true-pattern" library
     aux=load(TrueState_Library_path);
     TrueState_Library=aux.goldenEvents;
     clear aux
